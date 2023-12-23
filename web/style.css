@@ -442,6 +442,7 @@ dialog::backdrop {
 .litegraph.litesearchbox select {
 	background-color: var(--comfy-input-bg) !important;
 	color: var(--input-text);
+  max-width: 10em;
 }
 
 .litegraph.lite-search-item {

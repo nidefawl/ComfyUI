@@ -2040,7 +2040,20 @@ export class ComfyApp {
 					widget.options.values = def["input"]["required"][widget.name][0];
 
 					if(widget.name != 'image' && !widget.options.values.includes(widget.value)) {
-						widget.value = widget.options.values[0];
+						// assuming the widgets value is a path: split the path, get the filename (with extension)
+						// then look through widget.options.values (splitting its entries path and filename) for a match
+						// if found, set the widgets value to the matching entry
+						// path seperator could be / or double backslash
+						const widgetValue = widget.value.split(/\\|\//).pop();
+						const match = widget.options.values.find((value) => {
+							const valueFilename = value.split(/\\|\//).pop();
+							return valueFilename === widgetValue;
+						});
+						if (match) {  
+							widget.value = match;
+						} else {
+							widget.value = widget.options.values[0];
+						}
 						widget.callback(widget.value);
 					}
 				}

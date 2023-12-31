@@ -1797,6 +1797,8 @@ def load_custom_node(module_path, ignore=set()):
     if os.path.isfile(module_path):
         sp = os.path.splitext(module_path)
         module_name = sp[0]
+    if "." == module_name[0]:
+        return False
     try:
         if os.path.isfile(module_path):
             module_spec = importlib.util.spec_from_file_location(module_name, module_path)

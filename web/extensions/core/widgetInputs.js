@@ -474,13 +474,15 @@ app.registerExtension({
 				for (const linkInfo of links) {
 					const node = this.graph.getNodeById(linkInfo.target_id);
 					const input = node.inputs[linkInfo.target_slot];
-					let widget;
-					if (input.widget[TARGET]) {
-						widget = input.widget[TARGET];
-					} else {
-						const widgetName = input.widget.name;
-						if (widgetName) {
-							widget = node.widgets.find((w) => w.name === widgetName);
+					let widget = undefined;
+					if (input.widget) {
+						if (input.widget[TARGET]) {
+							widget = input.widget[TARGET];
+						} else {
+							const widgetName = input.widget.name;
+							if (widgetName) {
+								widget = node.widgets.find((w) => w.name === widgetName);
+							}
 						}
 					}
 
@@ -717,7 +719,7 @@ app.registerExtension({
 			#isValidConnection(input, forceUpdate) {
 				// Only allow connections where the configs match
 				const output = this.outputs[0];
-				const config2 = input.widget[GET_CONFIG]();
+				const config2 = !!input.widget ? input.widget[GET_CONFIG]() : [input.type, {}];
 				return !!mergeIfValid.call(this, output, config2, forceUpdate, this.recreateWidget);
 			}
 

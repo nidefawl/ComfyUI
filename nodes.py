@@ -1254,7 +1254,9 @@ class SetLatentNoiseMask:
 
 def common_ksampler(model, seed, steps, cfg, sampler_name, scheduler, positive, negative, latent, denoise=1.0, disable_noise=False, start_step=None, last_step=None, force_full_denoise=False):
     latent_image = latent["samples"]
-    if disable_noise:
+    if "noise_custom" in latent:
+        noise = latent["noise_custom"]
+    elif disable_noise:
         noise = torch.zeros(latent_image.size(), dtype=latent_image.dtype, layout=latent_image.layout, device="cpu")
     else:
         batch_inds = latent["batch_index"] if "batch_index" in latent else None

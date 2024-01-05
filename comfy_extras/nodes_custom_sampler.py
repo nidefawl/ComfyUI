@@ -258,7 +258,9 @@ class SamplerCustom:
     def sample(self, model, add_noise, noise_seed, cfg, positive, negative, sampler, sigmas, latent_image):
         latent = latent_image
         latent_image = latent["samples"]
-        if not add_noise:
+        if "noise_custom" in latent:
+            noise = latent["noise_custom"]
+        elif not add_noise:
             noise = torch.zeros(latent_image.size(), dtype=latent_image.dtype, layout=latent_image.layout, device="cpu")
         else:
             batch_inds = latent["batch_index"] if "batch_index" in latent else None

@@ -1818,10 +1818,16 @@ def load_custom_node(module_path, ignore=set()):
 
         if hasattr(module, "NODE_CLASS_MAPPINGS") and getattr(module, "NODE_CLASS_MAPPINGS") is not None:
             for name in module.NODE_CLASS_MAPPINGS:
-                if name not in ignore:
-                    NODE_CLASS_MAPPINGS[name] = module.NODE_CLASS_MAPPINGS[name]
-            if hasattr(module, "NODE_DISPLAY_NAME_MAPPINGS") and getattr(module, "NODE_DISPLAY_NAME_MAPPINGS") is not None:
-                NODE_DISPLAY_NAME_MAPPINGS.update(module.NODE_DISPLAY_NAME_MAPPINGS)
+                if name in ignore:
+                    continue
+                is_override = name in NODE_CLASS_MAPPINGS
+                if is_override:
+                    print(f"\33[31mOverriding node {name} ({NODE_CLASS_MAPPINGS[name].__module__}) with {module}")
+                NODE_CLASS_MAPPINGS[name] = module.NODE_CLASS_MAPPINGS[name]
+                if hasattr(module, "NODE_DISPLAY_NAME_MAPPINGS") and getattr(module, "NODE_DISPLAY_NAME_MAPPINGS") is not None and name in module.NODE_DISPLAY_NAME_MAPPINGS:
+                  NODE_DISPLAY_NAME_MAPPINGS[name] = module.NODE_DISPLAY_NAME_MAPPINGS[name]
+                elif is_override and name in NODE_DISPLAY_NAME_MAPPINGS:
+                  del NODE_DISPLAY_NAME_MAPPINGS[name]
             return True
         else:
             print(f"Skip {module_path} module for custom nodes due to the lack of NODE_CLASS_MAPPINGS.")

@@ -398,6 +398,7 @@ def load_models_gpu(models, memory_required=0):
         for d in devs:
             if d != torch.device("cpu"):
                 free_memory(extra_mem, d, models_already_loaded)
+                print(f"Freeing {int(extra_mem/(1024 * 1024))} MB")
         return
 
     print(f"Loading {len(models_to_load)} new model{'s' if len(models_to_load) > 1 else ''}")
@@ -409,7 +410,9 @@ def load_models_gpu(models, memory_required=0):
 
     for device in total_memory_required:
         if device != torch.device("cpu"):
-            free_memory(total_memory_required[device] * 1.3 + extra_mem, device, models_already_loaded)
+            per_device_memory = total_memory_required[device] * 1.3 + extra_mem
+            free_memory(per_device_memory, device, models_already_loaded)
+            print(f"Freeing {int(per_device_memory/(1024 * 1024))} MB")
 
     for loaded_model in models_to_load:
         model = loaded_model.model

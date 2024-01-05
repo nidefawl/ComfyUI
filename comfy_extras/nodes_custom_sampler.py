@@ -6,6 +6,9 @@ import torch
 import comfy.utils
 
 
+SIGMA_MAX = 14.61464214324951171875000000000000
+SIGMA_MIN = 0.02916753478348255157470703125000
+
 class BasicScheduler:
     @classmethod
     def INPUT_TYPES(s):
@@ -37,8 +40,8 @@ class KarrasScheduler:
     def INPUT_TYPES(s):
         return {"required":
                     {"steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
-                     "sigma_max": ("FLOAT", {"default": 14.614642, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
-                     "sigma_min": ("FLOAT", {"default": 0.0291675, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
+                     "sigma_max": ("FLOAT", {"default": SIGMA_MAX, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
+                     "sigma_min": ("FLOAT", {"default": SIGMA_MIN, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
                      "rho": ("FLOAT", {"default": 7.0, "min": 0.0, "max": 100.0, "step":0.01, "round": False}),
                     }
                }
@@ -56,8 +59,8 @@ class ExponentialScheduler:
     def INPUT_TYPES(s):
         return {"required":
                     {"steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
-                     "sigma_max": ("FLOAT", {"default": 14.614642, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
-                     "sigma_min": ("FLOAT", {"default": 0.0291675, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
+                     "sigma_max": ("FLOAT", {"default": SIGMA_MAX, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
+                     "sigma_min": ("FLOAT", {"default": SIGMA_MIN, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
                     }
                }
     RETURN_TYPES = ("SIGMAS",)
@@ -74,8 +77,8 @@ class PolyexponentialScheduler:
     def INPUT_TYPES(s):
         return {"required":
                     {"steps": ("INT", {"default": 20, "min": 1, "max": 10000}),
-                     "sigma_max": ("FLOAT", {"default": 14.614642, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
-                     "sigma_min": ("FLOAT", {"default": 0.0291675, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
+                     "sigma_max": ("FLOAT", {"default": SIGMA_MAX, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
+                     "sigma_min": ("FLOAT", {"default": SIGMA_MIN, "min": 0.0, "max": 1000.0, "step":0.01, "round": False}),
                      "rho": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 100.0, "step":0.01, "round": False}),
                     }
                }

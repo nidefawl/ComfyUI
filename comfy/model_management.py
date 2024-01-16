@@ -339,7 +339,7 @@ class LoadedModel:
         return self.model is other.model
 
 def minimum_inference_memory():
-    return (1024 * 1024 * 1024)
+    return (800 * 1024 * 1024)
 
 def unload_model_clones(model):
     to_unload = []

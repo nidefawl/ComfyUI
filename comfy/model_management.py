@@ -365,6 +365,7 @@ def free_memory(memory_required, device, keep_loaded=[]):
                 del m
                 unloaded_model = True
 
+    gc.collect()
     if unloaded_model:
         soft_empty_cache()
     else:

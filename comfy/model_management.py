@@ -4,6 +4,7 @@ from comfy.cli_args import args
 import comfy.utils
 import torch
 import sys
+import gc
 
 class VRAMState(Enum):
     DISABLED = 0    #No vram present: no need to move models to vram
@@ -285,15 +286,40 @@ class LoadedModel:
         else:
             return self.model_memory()
 
-    def model_load(self, lowvram_model_memory=0):
-        patch_model_to = None
-        if lowvram_model_memory == 0:
-            patch_model_to = self.device
-
-        self.model.model_patches_to(self.device)
-        self.model.model_patches_to(self.model.model_dtype())
+    def model_load(self):
+        global vram_state
+        print("Load model from device {} to {}".format(str(self.model.current_device), str(self.device)))
 
         try:
+            self.model.model_patches_to(self.device)
+            self.model.model_patches_to(self.model.model_dtype())
+        except Exception as e:
+            self.model.unpatch_model(self.model.offload_device)
+            self.model_unload()
+            raise e
+
+        if is_device_cpu(self.device):
+            vram_set_state = VRAMState.DISABLED
+        else:
+            vram_set_state = vram_state
+        lowvram_model_memory = 0
+        if lowvram_available and (vram_set_state == VRAMState.LOW_VRAM or vram_set_state == VRAMState.NORMAL_VRAM):
+            model_size = self.model_memory_required(self.device)
+            current_free_mem = get_free_memory(self.device) - minimum_inference_memory()
+            if model_size > current_free_mem: #only switch to lowvram if really necessary
+                vram_set_state = VRAMState.LOW_VRAM
+                lowvram_model_memory = int(max(64 * (1024 * 1024), current_free_mem * 0.85 ))
+
+        if vram_set_state == VRAMState.NO_VRAM:
+            lowvram_model_memory = 64 * 1024 * 1024
+
+        if lowvram_model_memory > 0:
+            print(f"Loading in lowvram mode {lowvram_model_memory//(1024 * 1024)} MB")
+
+        try:
+            patch_model_to = None
+            if lowvram_model_memory == 0:
+                patch_model_to = self.device
             self.real_model = self.model.patch_model(device_to=patch_model_to) #TODO: do something with loras and offloading to CPU
         except Exception as e:
             self.model.unpatch_model(self.model.offload_device)
@@ -301,7 +327,6 @@ class LoadedModel:
             raise e
 
         if lowvram_model_memory > 0:
-            print("loading in lowvram mode", lowvram_model_memory/(1024 * 1024))
             mem_counter = 0
             for m in self.real_model.modules():
                 if hasattr(m, "comfy_cast_weights"):
@@ -375,8 +400,6 @@ def free_memory(memory_required, device, keep_loaded=[]):
                 soft_empty_cache()
 
 def load_models_gpu(models, memory_required=0):
-    global vram_state
-
     inference_memory = minimum_inference_memory()
     extra_mem = max(inference_memory, memory_required)
 
@@ -419,26 +442,7 @@ def load_models_gpu(models, memory_required=0):
             print(f"Freeing {int(per_device_memory/(1024 * 1024))} MB")
 
     for loaded_model in models_to_load:
-        model = loaded_model.model
-        torch_dev = model.load_device
-        if is_device_cpu(torch_dev):
-            vram_set_state = VRAMState.DISABLED
-        else:
-            vram_set_state = vram_state
-        lowvram_model_memory = 0
-        if lowvram_available and (vram_set_state == VRAMState.LOW_VRAM or vram_set_state == VRAMState.NORMAL_VRAM):
-            model_size = loaded_model.model_memory_required(torch_dev)
-            current_free_mem = get_free_memory(torch_dev)
-            lowvram_model_memory = int(max(64 * (1024 * 1024), (current_free_mem - 1024 * (1024 * 1024)) / 1.3 ))
-            if model_size > (current_free_mem - inference_memory): #only switch to lowvram if really necessary
-                vram_set_state = VRAMState.LOW_VRAM
-            else:
-                lowvram_model_memory = 0
-
-        if vram_set_state == VRAMState.NO_VRAM:
-            lowvram_model_memory = 64 * 1024 * 1024
-
-        cur_loaded_model = loaded_model.model_load(lowvram_model_memory)
+        loaded_model.model_load()
         current_loaded_models.insert(0, loaded_model)
     return
 

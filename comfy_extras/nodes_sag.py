@@ -117,13 +117,12 @@ class SelfAttentionGuidance:
             # if uncond, save the attention scores
             heads = extra_options["n_heads"]
             cond_or_uncond = extra_options["cond_or_uncond"]
-            b = q.shape[0] // len(cond_or_uncond)
             if 1 in cond_or_uncond:
                 uncond_index = cond_or_uncond.index(1)
                 # do the entire attention operation, but save the attention scores to attn_scores
                 (out, sim) = attention_basic_with_sim(q, k, v, heads=heads)
                 # when using a higher batch size, I BELIEVE the result batch dimension is [uc1, ... ucn, c1, ... cn]
-                n_slices = heads * b
+                n_slices = heads * (q.shape[0] // len(cond_or_uncond))
                 attn_scores = sim[n_slices * uncond_index:n_slices * (uncond_index+1)]
                 return out
             else:

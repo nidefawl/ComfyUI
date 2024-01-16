@@ -599,7 +599,7 @@ def sample(model, noise, positive, negative, cfg, device, sampler, sigmas, model
     calculate_start_end_timesteps(model, negative)
     calculate_start_end_timesteps(model, positive)
 
-    if latent_image is not None and not 'skip_process_latent_in' in model_options:
+    if latent_image is not None and not 'skip_process_latent_in' in model_options or model_options.get('skip_process_latent_in', False) == False:
         latent_image = model.process_latent_in(latent_image)
 
     if hasattr(model, 'extra_conds'):
@@ -620,7 +620,7 @@ def sample(model, noise, positive, negative, cfg, device, sampler, sigmas, model
     extra_args = {"cond":positive, "uncond":negative, "cond_scale": cfg, "model_options": model_options, "seed":seed}
 
     samples = sampler.sample(model_wrap, sigmas, extra_args, callback, noise, latent_image, denoise_mask, disable_pbar)
-    if not 'skip_process_latent_out' in model_options:
+    if not 'skip_process_latent_out' in model_options or model_options.get('skip_process_latent_out', False) == False:
         samples = model.process_latent_out(samples.to(torch.float32))
     return samples
 

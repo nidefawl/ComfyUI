@@ -404,6 +404,9 @@ def load_models_gpu(models, memory_required=0):
 
     print(f"Loading {len(models_to_load)} new model{'s' if len(models_to_load) > 1 else ''}")
 
+    for loaded_model in models_to_load:
+        assert(loaded_model.model.load_device != loaded_model.model.current_device)
+
     total_memory_required = {}
     for loaded_model in models_to_load:
         unload_model_clones(loaded_model.model)

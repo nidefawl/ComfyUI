@@ -477,7 +477,31 @@
             if ( node.onNodeCreated ) {
                 node.onNodeCreated();
             }
-            
+            // console.log(this.slot_types_default_in);
+            // move type to top in this.slot_types_default_in[] lists
+            for (const input in node.inputs) {
+                const type_of_conn = node.inputs[input].type;
+                if (type_of_conn in this.slot_types_default_out) {
+                  // find index of type in this.slot_types_default_out and pop, then add to front
+                  const index = this.slot_types_default_out[type_of_conn].indexOf(type);
+                  if (index > -1) {
+                      this.slot_types_default_out[type_of_conn].splice(index, 1);
+                  }
+                  this.slot_types_default_out[type_of_conn].unshift(type);
+                }
+            }
+            // same for outputs
+            for (const output in node.outputs) {
+                const type_of_conn = node.outputs[output].type;
+                if (type_of_conn in this.slot_types_default_in) {
+                  // find index of type in this.slot_types_default_in and pop, then add to front
+                  const index = this.slot_types_default_in[type_of_conn].indexOf(type);
+                  if (index > -1) {
+                      this.slot_types_default_in[type_of_conn].splice(index, 1);
+                  }
+                  this.slot_types_default_in[type_of_conn].unshift(type);
+                }
+            }
             return node;
         },
 

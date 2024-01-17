@@ -115,7 +115,7 @@
         shift_click_do_break_link_from: false, // [false!] prefer false if results too easy to break links - implement with ALT or TODO custom keys
         click_do_break_link_to: false, // [false!]prefer false, way too easy to break links
         
-        search_hide_on_mouse_leave: true, // [false on mobile] better true if not touch device, TODO add an helper/listener to close if false
+        search_hide_on_mouse_leave: false, // [false on mobile] better true if not touch device, TODO add an helper/listener to close if false
         search_filter_enabled: false, // [true!] enable filtering slots type in the search widget, !requires auto_load_slot_types or manual set registered_slot_[in/out]_types and slot_types_[in/out]
         search_show_all_on_open: true, // [true!] opens the results list when opening the search widget
         
@@ -6187,10 +6187,16 @@ LGraphNode.prototype.executeAction = function(action)
 						}
 					}
 
-					if (is_double_click && !this.read_only && this.allow_searchbox) {
-						this.showSearchBox(e);
-						e.preventDefault();
-						e.stopPropagation();
+					if (!this.read_only && this.allow_searchbox) {
+            if (is_double_click) {
+              this.showSearchBox(e);
+              e.preventDefault();
+              e.stopPropagation();
+            } else if (this.search_box) {
+              that.search_box.close();
+              e.preventDefault();
+              e.stopPropagation();
+            }
 					}
 
 					clicking_canvas_bg = true;
@@ -11504,19 +11510,19 @@ LGraphNode.prototype.executeAction = function(action)
                     prevent_timeout++;
                 });
                 selIn.addEventListener("blur", function(e) {
-                   prevent_timeout = 0;
+                    prevent_timeout = 0;
                 });
                 selIn.addEventListener("change", function(e) {
-                    prevent_timeout = -1;
+                    prevent_timeout = 1;
                 });
                 selOut.addEventListener("click", function(e) {
                     prevent_timeout++;
                 });
                 selOut.addEventListener("blur", function(e) {
-                   prevent_timeout = 0;
+                    prevent_timeout = 0;
                 });
                 selOut.addEventListener("change", function(e) {
-                    prevent_timeout = -1;
+                    prevent_timeout = 1;
                 });
             }
         }
@@ -11564,8 +11570,8 @@ LGraphNode.prototype.executeAction = function(action)
                 }
                 e.preventDefault();
                 e.stopPropagation();
-				e.stopImmediatePropagation();
-				return true;
+				        e.stopImmediatePropagation();
+				        return true;
             });
         }
         

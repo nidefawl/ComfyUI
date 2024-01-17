@@ -2210,7 +2210,7 @@ export class ComfyApp {
 						// then look through widget.options.values (splitting its entries path and filename) for a match
 						// if found, set the widgets value to the matching entry
 						// path seperator could be / or double backslash
-						const widgetValue = widget.value.split(/\\|\//).pop();
+						const widgetValue = widget.value?.split(/\\|\//).pop();
 						const match = widget.options.values.find((value) => {
 							const valueFilename = value.split(/\\|\//).pop();
 							return valueFilename === widgetValue;

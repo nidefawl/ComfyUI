@@ -14,7 +14,12 @@ class LatentPreviewer:
         pass
 
     def decode_latent_to_preview_image(self, preview_format, x0):
-        preview_image = self.decode_latent_to_preview(x0)
+        try:
+          preview_image = self.decode_latent_to_preview(x0)
+        except Exception as e:
+          print("Error decoding latent to preview image")
+          print(e)
+          return None
         return ("JPEG", preview_image, MAX_PREVIEW_RESOLUTION)
 
 class TAESDPreviewerImpl(LatentPreviewer):

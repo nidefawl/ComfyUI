@@ -378,6 +378,7 @@ class PromptExecutor:
             for node_id in list(execute_outputs):
                 to_execute += [(0, node_id)]
 
+            max_errors = 4
             while len(to_execute) > 0:
                 #always execute the output that depends on the least amount of unexecuted nodes first
                 to_execute = sorted(list(map(lambda a: (len(recursive_will_execute(prompt, self.outputs, a[-1])), a[-1]), to_execute)))
@@ -389,7 +390,9 @@ class PromptExecutor:
                 self.success, error, ex = recursive_execute(self.server, prompt, self.outputs, output_node_id, extra_data, executed, prompt_id, self.outputs_ui, self.object_storage)
                 if self.success is not True:
                     self.handle_execution_error(prompt_id, prompt, current_outputs, executed, error, ex)
-                    break
+                    max_errors -= 1
+                    if max_errors <= 0:
+                      break
 
             for x in executed:
                 self.old_prompt[x] = copy.deepcopy(prompt[x])

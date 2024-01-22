@@ -562,7 +562,9 @@ class KSAMPLER(Sampler):
         return samples
 
 
-def ksampler(sampler_name, extra_options={}, inpaint_options={}):
+def ksampler(sampler_name, extra_options=None, inpaint_options=None):
+    extra_options = extra_options or {}
+    inpaint_options = inpaint_options or {}
     if sampler_name == "dpm_fast":
         def dpm_fast_function(model, noise, sigmas, extra_args, callback, disable):
             sigma_min = sigmas[-1]
@@ -580,7 +582,10 @@ def ksampler(sampler_name, extra_options={}, inpaint_options={}):
         sampler_function = dpm_adaptive_function
     else:
         sampler_function = getattr(k_diffusion_sampling, "sample_{}".format(sampler_name))
-
+    extra_state = None if not hasattr(comfy.samplers, "extra_state") else getattr(comfy.samplers, "extra_state")
+    if extra_state is not None: # merge into extra_options
+        for k in extra_state:
+            extra_options[k] = extra_state[k]
     return KSAMPLER(sampler_function, extra_options, inpaint_options)
 
 def wrap_model(model):

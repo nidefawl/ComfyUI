@@ -294,7 +294,7 @@ export const ComfyWidgets = {
 		let precision = app.ui.settings.getSettingValue("Comfy.FloatRoundingPrecision");
 		let disable_rounding = app.ui.settings.getSettingValue("Comfy.DisableFloatRounding")
 		if (precision == 0) precision = undefined;
-		const { val, config } = getNumberDefaults(inputData, 0.5, precision, !disable_rounding);
+		const { val, config } = getNumberDefaults(inputData, 0.01, precision, !disable_rounding);
 		return { widget: node.addWidget(widgetType, inputName, val, 
 			function (v) {
 				if (config.round) {
